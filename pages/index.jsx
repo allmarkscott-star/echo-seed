@@ -92,12 +92,15 @@ export default function EchoSeed() {
   var [voiceSupported, setVoiceSupported] = useState(false);
   var [editingId, setEditingId] = useState(null);
   var [editingTitle, setEditingTitle] = useState('');
+  var [editingMsgIndex, setEditingMsgIndex] = useState(null);
+  var [editingMsgText, setEditingMsgText] = useState('');
 
   var endRef = useRef(null);
   var taRef = useRef(null);
   var recRef = useRef(null);
   var fileRef = useRef(null);
   var editRef = useRef(null);
+  var msgEditRef = useRef(null);
 
   useEffect(function() { setMounted(true); }, []);
 
@@ -218,6 +221,49 @@ export default function EchoSeed() {
     setMemories(mems);
   }
 
+  async function commitMsgEdit(index) {
+    var newText = editingMsgText.trim();
+    if (!newText) { setEditingMsgIndex(null); return; }
+    // Truncate conversation up to and including this message, update the text
+    var truncated = messages.slice(0, index + 1).map(function(m, i) {
+      return i === index ? Object.assign({}, m, { content: newText, displayText: newText }) : m;
+    });
+    setMessages(truncated);
+    saveMessages(truncated);
+    setEditingMsgIndex(null);
+    setEditingMsgText('');
+    setLoading(true);
+    try {
+      var snap = memories.slice();
+      var res = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          messages: truncated.map(function(m) { return { role: m.role, content: m.content }; }),
+          systemPrompt: buildSystemPrompt(snap, getActiveTitle())
+        })
+      });
+      var data = await res.json();
+      if (data.error) throw new Error(data.error);
+      var raw = data.content.map(function(b) { return b.text || ''; }).join('');
+      var newMems = extractNewMemories(raw);
+      if (newMems.length > 0) {
+        saveMems(snap.concat(newMems.map(function(t) { return { text: t, timestamp: new Date().toISOString() }; })));
+      }
+      var clean = cleanText(raw);
+      var withReply = truncated.concat([{ role: 'assistant', content: clean, displayText: clean }]);
+      setMessages(withReply);
+      saveMessages(withReply);
+      speak(clean);
+    } catch(err) {
+      var withErr = truncated.concat([{ role: 'assistant', content: 'Something went wrong: ' + err.message, displayText: 'Something went wrong: ' + err.message }]);
+      setMessages(withErr);
+      saveMessages(withErr);
+    } finally {
+      setLoading(false);
+    }
+  }
+
   function toggleListen() {
     if (!recRef.current) return;
     if (listening) { recRef.current.stop(); }
@@ -324,7 +370,7 @@ export default function EchoSeed() {
       <Head>
         <title>Echo Seed</title>
         <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <style>{'\n          * { box-sizing: border-box; margin: 0; padding: 0; }\n          body { background: ' + C.sidebarBg + '; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; }\n          button { cursor: pointer; font-family: inherit; border: none; }\n          textarea { font-family: inherit; }\n          textarea:focus { outline: none; }\n          input:focus { outline: none; }\n          @keyframes ep { 0%,80%,100%{opacity:.2;transform:scale(.7)} 40%{opacity:1;transform:scale(1)} }\n          ::-webkit-scrollbar { width: 4px; }\n          ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }\n          .conv-item:hover { background: ' + C.sidebarActive + '; }\n          .conv-item:hover .conv-actions { opacity: 1 !important; }\n        '}</style>
+        <style>{'\n          * { box-sizing: border-box; margin: 0; padding: 0; }\n          body { background: ' + C.sidebarBg + '; font-family: -apple-system, BlinkMacSystemFont, Segoe UI, sans-serif; }\n          button { cursor: pointer; font-family: inherit; border: none; }\n          textarea { font-family: inherit; }\n          textarea:focus { outline: none; }\n          input:focus { outline: none; }\n          @keyframes ep { 0%,80%,100%{opacity:.2;transform:scale(.7)} 40%{opacity:1;transform:scale(1)} }\n          ::-webkit-scrollbar { width: 4px; }\n          ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.15); border-radius: 2px; }\n          .conv-item:hover { background: ' + C.sidebarActive + '; }\n          .conv-item:hover .conv-actions { opacity: 1 !important; }\n          .msg-row:hover .edit-btn { opacity: 1 !important; }\n        '}</style>
       </Head>
 
       <div style={{ display: 'flex', height: '100vh', overflow: 'hidden' }}>
@@ -433,13 +479,37 @@ export default function EchoSeed() {
             )}
 
             {messages.map(function(msg, i) {
+              var isEditingThis = editingMsgIndex === i;
               return (
-                <div key={i} style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', gap: 3 }}>
-                  <div style={{ fontSize: 11, color: C.light }}>{msg.role === 'user' ? 'Scott' : 'Echo Seed'}</div>
-                  {msg.imagePreview && <img src={msg.imagePreview} alt="shared" style={{ maxWidth: 200, borderRadius: 10, marginBottom: 3 }} />}
-                  <div style={{ maxWidth: '80%', padding: '9px 13px', borderRadius: msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: msg.role === 'user' ? C.scottBubble : C.echoBubble, color: msg.role === 'user' ? C.scottText : C.text, fontSize: 14, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                    {msg.displayText}
+                <div key={i} className="msg-row" style={{ display: 'flex', flexDirection: 'column', alignItems: msg.role === 'user' ? 'flex-end' : 'flex-start', gap: 3, position: 'relative' }}>
+                  <div style={{ fontSize: 11, color: C.light, display: 'flex', alignItems: 'center', gap: 6 }}>
+                    {msg.role === 'user' ? 'Scott' : 'Echo Seed'}
+                    {msg.role === 'user' && !isEditingThis && (
+                      <button className="edit-btn" onClick={function() { setEditingMsgIndex(i); setEditingMsgText(msg.displayText || ''); }} style={{ opacity: 0, fontSize: 11, background: 'none', border: 'none', color: C.light, cursor: 'pointer', padding: '0 2px', transition: 'opacity .15s' }} title="Edit message">✏️</button>
+                    )}
                   </div>
+                  {msg.imagePreview && <img src={msg.imagePreview} alt="shared" style={{ maxWidth: 200, borderRadius: 10, marginBottom: 3 }} />}
+                  {isEditingThis ? (
+                    <div style={{ maxWidth: '80%', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
+                      <textarea
+                        ref={msgEditRef}
+                        value={editingMsgText}
+                        onChange={function(e) { setEditingMsgText(e.target.value); }}
+                        onKeyDown={function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitMsgEdit(i); } if (e.key === 'Escape') { setEditingMsgIndex(null); } }}
+                        autoFocus
+                        rows={3}
+                        style={{ width: 320, resize: 'none', padding: '8px 12px', fontSize: 14, lineHeight: 1.5, border: '1.5px solid ' + C.accent, borderRadius: 12, background: C.white, color: C.text, fontFamily: 'inherit' }}
+                      />
+                      <div style={{ display: 'flex', gap: 6 }}>
+                        <button onClick={function() { setEditingMsgIndex(null); }} style={{ padding: '4px 12px', borderRadius: 8, border: '1px solid ' + C.border, background: 'transparent', color: C.muted, fontSize: 12, cursor: 'pointer' }}>Cancel</button>
+                        <button onClick={function() { commitMsgEdit(i); }} style={{ padding: '4px 12px', borderRadius: 8, border: 'none', background: C.accent, color: '#fff', fontSize: 12, cursor: 'pointer' }}>Send ➤</button>
+                      </div>
+                    </div>
+                  ) : (
+                    <div style={{ maxWidth: '80%', padding: '9px 13px', borderRadius: msg.role === 'user' ? '14px 14px 4px 14px' : '14px 14px 14px 4px', background: msg.role === 'user' ? C.scottBubble : C.echoBubble, color: msg.role === 'user' ? C.scottText : C.text, fontSize: 14, lineHeight: 1.65, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                      {msg.displayText}
+                    </div>
+                  )}
                 </div>
               );
             })}
