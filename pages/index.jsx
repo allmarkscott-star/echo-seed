@@ -282,9 +282,16 @@ export default function EchoSeed() {
   function handleImageSelect(e) {
     var file = e.target.files[0];
     if (!file) return;
+    var isPdf = file.type === 'application/pdf';
     var reader = new FileReader();
     reader.onload = function(ev) {
-      setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: ev.target.result, name: file.name });
+      setPendingImage({
+        base64: ev.target.result.split(',')[1],
+        type: file.type,
+        preview: isPdf ? null : ev.target.result,
+        name: file.name,
+        isPdf: isPdf
+      });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -300,7 +307,12 @@ export default function EchoSeed() {
     var text = input.trim();
     var img = pendingImage;
     var apiContent = img
-      ? [{ type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } }, { type: 'text', text: text || 'What do you see in this image?' }]
+      ? [
+          img.isPdf
+            ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } }
+            : { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } },
+          { type: 'text', text: text || (img.isPdf ? 'Please read this PDF and summarise it for me.' : 'What do you see in this image?') }
+        ]
       : text;
     var userMsg = { role: 'user', content: apiContent, displayText: text || 'Shared an image', imagePreview: img ? img.preview : null };
     var next = messages.concat([userMsg]);
@@ -529,7 +541,10 @@ export default function EchoSeed() {
           {/* Pending image */}
           {pendingImage && (
             <div style={{ padding: '6px 18px', background: C.bg, borderTop: '1px solid ' + C.border, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              <img src={pendingImage.preview} alt="" style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 6 }} />
+              {pendingImage.isPdf
+                ? <div style={{ width: 40, height: 40, borderRadius: 6, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18, flexShrink: 0 }}>📄</div>
+                : <img src={pendingImage.preview} alt="" style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 6 }} />
+              }
               <span style={{ fontSize: 12, color: C.muted, flex: 1 }}>{pendingImage.name}</span>
               <button onClick={function() { setPendingImage(null); }} style={{ background: 'none', color: C.light, fontSize: 18, padding: '0 4px' }}>×</button>
             </div>
@@ -538,7 +553,7 @@ export default function EchoSeed() {
           {/* Input */}
           <div style={{ padding: '10px 18px', borderTop: '1px solid ' + C.border, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
-              <input ref={fileRef} type="file" accept="image/*" onChange={handleImageSelect} style={{ display: 'none' }} />
+              <input ref={fileRef} type="file" accept="image/*,application/pdf" onChange={handleImageSelect} style={{ display: 'none' }} />
               <button onClick={function() { if (fileRef.current) fileRef.current.click(); }} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + C.border, background: 'transparent', color: C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>📎</button>
               {voiceSupported && (
                 <button onClick={toggleListen} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + (listening ? C.accent : C.border), background: listening ? C.accentLight : 'transparent', color: listening ? C.accent : C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
