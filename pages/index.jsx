@@ -341,10 +341,11 @@ export default function EchoSeed() {
   function handleFileSelect(e) {
     var file = e.target.files[0];
     if (!file) return;
+    var isImage = file.type.startsWith('image/')
     var isPdf = file.type === 'application/pdf';
     var reader = new FileReader();
     reader.onload = function(ev) {
-      setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: isPdf ? null : ev.target.result, name: file.name, isPdf: isPdf });
+      setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: isImage ? ev.target.result : null, name: file.name, isPdf: isPdf, isImage: isImage });
     };
     reader.readAsDataURL(file);
     e.target.value = '';
@@ -394,13 +395,13 @@ export default function EchoSeed() {
     var img = pendingImage;
     var apiContent = img
       ? [
-          img.isPdf
-            ? { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } }
-            : { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } },
-          { type: 'text', text: text || (img.isPdf ? 'Please read this PDF and summarise it for me.' : 'What do you see in this image?') }
+          img.isImage
+            ? { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } }
+            : { type: 'document', source: { type: 'base64', media_type: img.isPdf ? 'application/pdf' : 'text/plain', data: img.base64 } },
+          { type: 'text', text: text || (img.isImage ? 'What do you see in this file?' : 'Please read this file and summarise it for me.') }
         ]
       : text;
-    var userMsg = { role: 'user', content: apiContent, displayText: text || 'Shared a file', imagePreview: (img && !img.isPdf) ? img.preview : null };
+    var userMsg = { role: 'user', content: apiContent, displayText: text || 'Shared a file', imagePreview: img && img.isImage ? img.preview : null };
     var next = messages.concat([userMsg]);
     setMessages(next);
     await saveMessages(next);
@@ -590,7 +591,7 @@ export default function EchoSeed() {
 
           <div style={{ padding: '10px 18px', borderTop: '1px solid ' + C.border, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
-              <input ref={fileRef} type="file" accept="image/*,application/pdf" onChange={handleFileSelect} style={{ display: 'none' }} />
+              <input ref={fileRef} type="file" accept="*/*" onChange={handleFileSelect} style={{ display: 'none' }} />
               <button onClick={function() { if (fileRef.current) fileRef.current.click(); }} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + C.border, background: 'transparent', color: C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>📎</button>
               {voiceSupported && (
                 <button onClick={toggleListen} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + (listening ? C.accent : C.border), background: listening ? C.accentLight : 'transparent', color: listening ? C.accent : C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
