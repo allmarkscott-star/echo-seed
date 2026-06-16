@@ -341,13 +341,22 @@ export default function EchoSeed() {
   function handleFileSelect(e) {
     var file = e.target.files[0];
     if (!file) return;
-    var isImage = file.type.startsWith('image/')
+    var isImage = file.type.startsWith('image/');
     var isPdf = file.type === 'application/pdf';
-    var reader = new FileReader();
-    reader.onload = function(ev) {
-      setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: isImage ? ev.target.result : null, name: file.name, isPdf: isPdf, isImage: isImage });
-    };
-    reader.readAsDataURL(file);
+    var isText = !isImage && !isPdf;
+    if (isText) {
+      var textReader = new FileReader();
+      textReader.onload = function(ev) {
+        setPendingImage({ textContent: ev.target.result, type: file.type, preview: null, name: file.name, isPdf: false, isImage: false, isText: true });
+      };
+      textReader.readAsText(file);
+    } else {
+      var reader = new FileReader();
+      reader.onload = function(ev) {
+        setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: isImage ? ev.target.result : null, name: file.name, isPdf: isPdf, isImage: isImage, isText: false });
+      };
+      reader.readAsDataURL(file);
+    }
     e.target.value = '';
   }
 
@@ -393,13 +402,16 @@ export default function EchoSeed() {
     if ((!input.trim() && !pendingImage) || loading) return;
     var text = input.trim();
     var img = pendingImage;
+    var filePrompt = text || (img && img.isImage ? 'What do you see in this image?' : 'Please read this file and summarise it for me.');
     var apiContent = img
-      ? [
-          img.isImage
-            ? { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } }
-            : { type: 'document', source: { type: 'base64', media_type: img.isPdf ? 'application/pdf' : 'text/plain', data: img.base64 } },
-          { type: 'text', text: text || (img.isImage ? 'What do you see in this file?' : 'Please read this file and summarise it for me.') }
-        ]
+      ? img.isText
+        ? (filePrompt + '\n\nFile: ' + img.name + '\n\n' + img.textContent)
+        : [
+            img.isImage
+              ? { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } }
+              : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } },
+            { type: 'text', text: filePrompt }
+          ]
       : text;
     var userMsg = { role: 'user', content: apiContent, displayText: text || 'Shared a file', imagePreview: img && img.isImage ? img.preview : null };
     var next = messages.concat([userMsg]);
