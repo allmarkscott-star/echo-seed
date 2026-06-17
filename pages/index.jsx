@@ -92,6 +92,7 @@ export default function EchoSeed() {
   var [editingTitle, setEditingTitle] = useState('');
   var [editingMsgIndex, setEditingMsgIndex] = useState(null);
   var [editingMsgText, setEditingMsgText] = useState('');
+  var [saveWarning, setSaveWarning] = useState(false);
   var [initStatus, setInitStatus] = useState('Loading Echo Seed...');
 
   var endRef = useRef(null);
@@ -229,12 +230,22 @@ export default function EchoSeed() {
 
   async function saveConvToDb(conv) {
     try {
-      await fetch('/api/conversations', {
+      var res = await fetch('/api/conversations', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(conv)
       });
-    } catch(e) {}
+      if (!res.ok) {
+        var errText = await res.text();
+        console.error('Failed to save conversation to database:', errText);
+        setSaveWarning(true);
+        setTimeout(function() { setSaveWarning(false); }, 8000);
+      }
+    } catch(e) {
+      console.error('Failed to save conversation to database:', e.message);
+      setSaveWarning(true);
+      setTimeout(function() { setSaveWarning(false); }, 8000);
+    }
     localSet('echoseed-conversations', conversations.map(function(c) { return c.id === conv.id ? conv : c; }));
   }
 
@@ -538,6 +549,12 @@ export default function EchoSeed() {
                 ? <p style={{ fontSize: 12, color: C.light, fontStyle: 'italic' }}>Nothing yet. Memories build as you talk — and now they last forever.</p>
                 : memories.map(function(m, i) { return <div key={i} style={{ fontSize: 12, color: C.muted, padding: '3px 0', borderBottom: i < memories.length - 1 ? '1px solid ' + C.borderLight : 'none', lineHeight: 1.5 }}>{m.text}</div>; })
               }
+            </div>
+          )}
+
+          {saveWarning && (
+            <div style={{ background: '#FEF3CD', borderBottom: '1px solid #F5D78E', padding: '8px 18px', flexShrink: 0, fontSize: 12, color: '#7A5C00' }}>
+              ⚠️ This message couldn't be saved permanently — it may not be here after a refresh. Try again, or contact Claude if it keeps happening.
             </div>
           )}
 
