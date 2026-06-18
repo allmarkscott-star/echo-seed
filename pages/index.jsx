@@ -71,6 +71,21 @@ function localSet(key, val) {
   try { localStorage.setItem(key, JSON.stringify(val)); } catch(e) {}
 }
 
+var EMOJI_CATEGORIES = {
+  smileys: ['😀','😃','😄','😁','😆','😅','😂','🤣','🥲','😊','😇','🙂','🙃','😉','😌','😍','🥰','😘','😗','😙','😚','😋','😛','😝','😜','🤪','🤨','🧐','🤓','😎','🥸','🤩','🥳','😏','😒','😞','😔','😟','😕','🙁','😣','😖','😫','😩','🥺','😢','😭','😤','😠','😡','🤬','🤯','😳','🥵','🥶','😱','😨','😰','😥','😓','🤗','🤔','🫡','🤭','🫢','🫣','🤫','🤥','😶','🫥','😐','🫤','😑','😬','🙄','😯','😦','😧','😮','😲','🥱','😴','🤤','😪','😵','🤐','🥴','🤢','🤮','🤧','😷','🤒','🤕','🤑','🤠','👻','💀','☠️','🤡','👽','👾','🤖'],
+  gestures: ['👋','🤚','🖐️','✋','🖖','🫱','🫲','🫳','🫴','👌','🤌','🤏','✌️','🤞','🫰','🤟','🤘','🤙','👈','👉','👆','🖕','👇','☝️','🫵','👍','👎','✊','👊','🤛','🤜','👏','🙌','🫶','👐','🤲','🤝','🙏','✍️','💅','🤳','💪','🦾','🦿','🦵','🦶','👂','🦻','👃','🧠','🦷','🦴','👀','👁️','👅','👄','💋'],
+  hearts: ['❤️','🧡','💛','💚','💙','💜','🖤','🤍','🤎','💔','❣️','💕','💞','💓','💗','💖','💘','💝','💟','♥️','💯','💢','💥','💫','💦','💨','🕳️','💣','💬','👁️‍🗨️','🗨️','🗯️','💭','💤'],
+  animals: ['🐶','🐱','🐭','🐹','🐰','🦊','🐻','🐼','🐻‍❄️','🐨','🐯','🦁','🐮','🐷','🐽','🐸','🐵','🙈','🙉','🙊','🐒','🐔','🐧','🐦','🐤','🐣','🐥','🦆','🦅','🦉','🦇','🐺','🐗','🐴','🦄','🐝','🪱','🐛','🦋','🐌','🐞','🐜','🪰','🪲','🪳','🦟','🦗','🕷️','🕸️','🦂','🐢','🐍','🦎','🦖','🦕','🐙','🦑','🦐','🦞','🦀','🐡','🐠','🐟','🐬','🐳','🐋','🦈','🐊','🐅','🐆','🦓','🦍','🦧','🦣','🐘','🦛','🦏','🐪','🐫','🦒','🦘','🦬','🐃','🐂','🐄','🐎','🐖','🐏','🐑','🦙','🐐','🦌','🐕','🐩','🦮','🐈','🪶','🐓','🦃','🦤','🦚','🦜','🦢','🦩','🕊️','🐇','🦝','🦨','🦡','🦫','🦦','🦥','🐁','🐀','🐿️','🦔'],
+  food: ['🍇','🍈','🍉','🍊','🍋','🍌','🍍','🥭','🍎','🍏','🍐','🍑','🍒','🍓','🫐','🥝','🍅','🫒','🥥','🥑','🍆','🥔','🥕','🌽','🌶️','🫑','🥒','🥬','🥦','🧄','🧅','🍄','🥜','🫘','🌰','🍞','🥐','🥖','🫓','🥨','🥯','🥞','🧇','🧀','🍖','🍗','🥩','🥓','🍔','🍟','🍕','🌭','🥪','🌮','🌯','🫔','🥙','🧆','🥚','🍳','🥘','🍲','🫕','🥣','🥗','🍿','🧈','🧂','🥫','🍱','🍘','🍙','🍚','🍛','🍜','🍝','🍠','🍢','🍣','🍤','🍥','🥮','🍡','🥟','🥠','🥡','🦪','🍦','🍧','🍨','🍩','🍪','🎂','🍰','🧁','🥧','🍫','🍬','🍭','🍮','🍯','🍼','🥛','☕','🫖','🍵','🍶','🍾','🍷','🍸','🍹','🍺','🍻','🥂','🥃','🥤','🧋','🧃','🧉','🧊'],
+  travel: ['🚗','🚕','🚙','🚌','🚎','🏎️','🚓','🚑','🚒','🚐','🛻','🚚','🚛','🚜','🛵','🏍️','🛺','🚲','🛴','🚨','🚔','🚍','🚘','🚖','🚡','🚠','🚟','🚃','🚋','🚞','🚝','🚄','🚅','🚈','🚂','🚆','🚇','🚊','🚉','✈️','🛫','🛬','🛩️','💺','🛰️','🚀','🛸','🚁','🛶','⛵','🚤','🛥️','🛳️','⛴️','🚢','⚓','🪝','⛽','🚧','🚦','🚥','🗺️','🗿','🗽','🗼','🏰','🏯','🏟️','🎡','🎢','🎠','⛲','⛱️','🏖️','🏝️','🏜️','🌋','⛰️','🏔️','🗻','🏕️','⛺','🏠','🏡','🏘️','🏚️','🏗️','🏭','🏢','🏬','🏣','🏤','🏥','🏦','🏨','🏪','🏫','🏩','💒','🏛️','⛪','🕌','🕍','🛕','🕋'],
+  symbols: ['✅','❌','❓','❗','❕','❔','‼️','⁉️','💯','🔥','✨','⭐','🌟','💫','⚡','💥','💢','💦','💨','🕳️','💣','💬','💭','🔴','🟠','🟡','🟢','🔵','🟣','🟤','⚫','⚪','🔶','🔷','🔸','🔹','🔺','🔻','💠','🔲','🔳','♻️','🔄','🔁','🔂','▶️','⏸️','⏹️','⏺️','⏭️','⏮️','⏩','⏪','🔼','🔽','➡️','⬅️','⬆️','⬇️','↗️','↘️','↙️','↖️','↕️','↔️','🔀','🆗','🆕','🆙','🆒','🆓','🔝','🔚','🔛','🔜','🔙','📛','🔰','⚠️','🚸','⛔','🚫','📵','🔞','☢️','☣️'],
+};
+
+var EMOJI_CATEGORY_LABELS = { smileys: '😀 Faces', gestures: '👋 Gestures', hearts: '❤️ Hearts', animals: '🐱 Animals', food: '🍩 Food', travel: '✈️ Travel', symbols: '✅ Symbols' };
+
+var EMOJI_KEYWORDS = {'😀':'grinning happy','😃':'smile happy','😄':'happy laugh','😁':'grin happy','😆':'laugh happy','😅':'sweat smile nervous','😂':'laugh tears funny','🤣':'rofl funny laugh','🥲':'smile tear sad happy','😊':'smile happy blush','😇':'angel innocent','🙂':'smile slight','🙃':'upside down silly','😉':'wink','😌':'relieved calm','😍':'heart eyes love','🥰':'love hearts adore','😘':'kiss love','😗':'kiss','😙':'kiss','😚':'kiss closed eyes','😋':'yum tongue delicious','😛':'tongue silly','😝':'tongue squint silly','😜':'wink tongue silly','🤪':'crazy zany silly','🤨':'suspicious eyebrow','🧐':'monocle thinking inspect','🤓':'nerd glasses','😎':'cool sunglasses','🥸':'disguise glasses mustache','🤩':'star struck excited','🥳':'party celebrate','😏':'smirk','😒':'unamused','😞':'disappointed sad','😔':'sad pensive','😟':'worried','😕':'confused','🙁':'sad frown','😣':'persevere struggle','😖':'confounded','😫':'tired exhausted','😩':'weary tired','🥺':'pleading puppy eyes','😢':'crying sad tear','😭':'sobbing crying loud','😤':'frustrated steam','😠':'angry mad','😡':'angry rage red','🤬':'swearing angry curse','🤯':'mind blown shocked','😳':'flushed embarrassed','🥵':'hot sweating','🥶':'cold freezing','😱':'scream shocked fear','😨':'fearful scared','😰':'anxious sweat','😥':'sad disappointed','😓':'sweat downcast','🤗':'hug','🤔':'thinking','🫡':'salute respect','🤭':'giggle hand mouth','🫢':'gasp surprise','🫣':'peeking shy','🤫':'shush quiet secret','🤥':'lying pinocchio','😶':'no mouth speechless','🫥':'invisible dotted','😐':'neutral','🫤':'meh','😑':'expressionless blank','😬':'grimace awkward','🙄':'eye roll','😯':'surprised gasp','😦':'frowning open mouth','😧':'anguished','😮':'surprised open mouth wow','😲':'astonished shocked','🥱':'yawn bored tired','😴':'sleeping zzz tired','🤤':'drooling','😪':'sleepy tired','😵':'dizzy confused','🤐':'zipper mouth quiet','🥴':'woozy drunk dizzy','🤢':'nauseated sick','🤮':'vomit sick','🤧':'sneeze sick','😷':'mask sick ill','🤒':'thermometer sick fever','🤕':'bandage hurt injured','🤑':'money mouth rich','🤠':'cowboy hat','👻':'ghost spooky halloween','💀':'skull death','☠️':'skull crossbones danger','🤡':'clown','👽':'alien ufo','👾':'alien monster game','🤖':'robot','🐶':'dog','🐱':'cat','🐭':'mouse','🐹':'hamster','🐰':'rabbit bunny','🦊':'fox','🐻':'bear','🐼':'panda','🐻‍❄️':'polar bear','🐨':'koala','🐯':'tiger','🦁':'lion','🐮':'cow','🐷':'pig','🐽':'pig nose','🐸':'frog','🐵':'monkey','🙈':'monkey see no evil','🙉':'monkey hear no evil','🙊':'monkey speak no evil','🐒':'monkey','🐔':'chicken rooster','🐧':'penguin','🐦':'bird','🐤':'baby chick','🐣':'hatching chick','🐥':'chick','🦆':'duck','🦅':'eagle bird','🦉':'owl','🦇':'bat vampire','🐺':'wolf','🐗':'boar','🐴':'horse','🦄':'unicorn','🐝':'bee bug insect','🪱':'worm','🐛':'caterpillar bug insect','🦋':'butterfly','🐌':'snail slow','🐞':'ladybug insect','🐜':'ant insect','🪰':'fly insect','🪲':'beetle insect','🪳':'cockroach insect','🦟':'mosquito insect','🦗':'cricket insect grasshopper','🕷️':'spider','🕸️':'spider web','🦂':'scorpion','🐢':'turtle','🐍':'snake','🦎':'lizard','🦖':'dinosaur trex','🦕':'dinosaur sauropod','🐙':'octopus','🦑':'squid','🦐':'shrimp','🦞':'lobster','🦀':'crab','🐡':'blowfish puffer fish','🐠':'fish tropical','🐟':'fish','🐬':'dolphin','🐳':'whale','🐋':'whale','🦈':'shark','🐊':'crocodile alligator','🐅':'tiger','🐆':'leopard','🦓':'zebra','🦍':'gorilla','🦧':'orangutan','🦣':'mammoth','🐘':'elephant','🦛':'hippo','🦏':'rhino','🐪':'camel','🐫':'camel two hump','🦒':'giraffe','🦘':'kangaroo','🦬':'bison','🐃':'buffalo','🐂':'ox bull','🐄':'cow','🐎':'horse racing','🐖':'pig','🐏':'ram sheep','🐑':'sheep','🦙':'llama alpaca','🐐':'goat','🦌':'deer','🐕':'dog','🐩':'poodle dog','🦮':'guide dog','🐈':'cat','🪶':'feather','🐓':'rooster chicken','🦃':'turkey','🦤':'dodo bird','🦚':'peacock','🦜':'parrot bird','🦢':'swan bird','🦩':'flamingo bird','🕊️':'dove peace bird','🐇':'rabbit','🦝':'raccoon','🦨':'skunk','🦡':'badger','🦫':'beaver','🦦':'otter','🦥':'sloth','🐁':'mouse','🐀':'rat','🐿️':'squirrel chipmunk','🦔':'hedgehog','🍇':'grapes fruit','🍈':'melon fruit','🍉':'watermelon fruit','🍊':'orange fruit tangerine','🍋':'lemon fruit','🍌':'banana fruit','🍍':'pineapple fruit','🥭':'mango fruit','🍎':'apple fruit red','🍏':'apple fruit green','🍐':'pear fruit','🍑':'peach fruit','🍒':'cherries fruit','🍓':'strawberry fruit','🫐':'blueberries fruit','🥝':'kiwi fruit','🍅':'tomato vegetable','🫒':'olive food','🥥':'coconut fruit','🥑':'avocado fruit','🍆':'eggplant aubergine vegetable','🥔':'potato vegetable','🥕':'carrot vegetable','🌽':'corn maize vegetable','🌶️':'chili pepper hot spicy','🫑':'bell pepper vegetable','🥒':'cucumber vegetable','🥬':'leafy green vegetable lettuce','🥦':'broccoli vegetable','🧄':'garlic','🧅':'onion','🍄':'mushroom fungi','🥜':'peanut nut','🫘':'beans food','🌰':'chestnut nut','🍞':'bread loaf','🥐':'croissant bread','🥖':'baguette bread french','🫓':'flatbread','🥨':'pretzel snack','🥯':'bagel bread','🥞':'pancakes breakfast','🧇':'waffle breakfast','🧀':'cheese','🍖':'meat bone','🍗':'poultry leg chicken meat','🥩':'steak meat','🥓':'bacon meat','🍔':'hamburger burger food','🍟':'fries chips food','🍕':'pizza food','🌭':'hot dog food','🥪':'sandwich food','🌮':'taco food mexican','🌯':'burrito food mexican','🫔':'tamale food','🥙':'falafel pita food','🧆':'falafel food','🥚':'egg food','🍳':'fried egg cooking','🥘':'paella pan food','🍲':'stew pot food','🫕':'fondue food','🥣':'bowl food cereal','🥗':'salad healthy food','🍿':'popcorn snack','🧈':'butter food','🧂':'salt food','🥫':'canned food can','🍱':'bento box food japanese','🍘':'rice cracker food japanese','🍙':'rice ball onigiri food japanese','🍚':'rice cooked food','🍛':'curry rice food','🍜':'noodles ramen soup food','🍝':'spaghetti pasta food','🍠':'sweet potato food','🍢':'oden skewer food japanese','🍣':'sushi food japanese','🍤':'shrimp tempura food','🍥':'fish cake food','🥮':'mooncake food','🍡':'dango dessert japanese','🥟':'dumpling food','🥠':'fortune cookie dessert','🥡':'takeout food box','🦪':'oyster seafood','🍦':'ice cream soft serve dessert','🍧':'shaved ice dessert','🍨':'ice cream dessert','🍩':'donut doughnut dessert sweet','🍪':'cookie dessert sweet','🎂':'birthday cake','🍰':'cake slice dessert sweet','🧁':'cupcake dessert sweet','🥧':'pie dessert sweet','🍫':'chocolate sweet candy','🍬':'candy sweet','🍭':'lollipop candy sweet','🍮':'custard pudding dessert','🍯':'honey sweet','🍼':'baby bottle milk','🥛':'milk glass','☕':'coffee','🫖':'teapot tea drink','🍵':'tea hot drink green','🍶':'sake drink alcohol','🍾':'champagne bottle drink celebrate','🍷':'wine glass drink alcohol','🍸':'cocktail drink alcohol martini','🍹':'tropical drink cocktail','🍺':'beer drink alcohol mug','🍻':'beers cheers drink alcohol','🥂':'champagne glasses cheers celebrate','🥃':'whiskey drink alcohol glass','🥤':'cup soda drink straw','🧋':'bubble tea boba drink','🧃':'juice box drink','🧉':'mate drink','🧊':'ice cube cold','👋':'wave hello hi','🤚':'hand stop raised','🖐️':'hand fingers splayed','✋':'hand stop high five','🖖':'vulcan salute spock','👌':'ok okay perfect','🤌':'pinch fingers italian','✌️':'peace victory','🤞':'crossed fingers hope luck','🤟':'love you sign','🤘':'rock on metal','🤙':'call me shaka','👈':'point left','👉':'point right','👆':'point up','👇':'point down','☝️':'point up one','👍':'thumbs up good yes','👎':'thumbs down bad no','✊':'fist','👊':'fist bump punch','🤛':'fist left','🤜':'fist right','👏':'clap applause','🙌':'hands up celebrate praise','🫶':'heart hands love','👐':'open hands','🤲':'palms together','🤝':'handshake deal agree','🙏':'pray please thanks','💪':'muscle strong flex','❤️':'heart love red','🧡':'heart orange','💛':'heart yellow','💚':'heart green','💙':'heart blue','💜':'heart purple','🖤':'heart black','🤍':'heart white','🤎':'heart brown','💔':'broken heart sad','❣️':'heart exclamation','💕':'two hearts love','💞':'revolving hearts love','💓':'beating heart love','💗':'growing heart love','💖':'sparkling heart love','💘':'heart arrow cupid love','💝':'heart gift box love','💟':'heart decoration','✅':'check mark done yes correct','❌':'cross mark no wrong','❓':'question mark','❗':'exclamation mark','💯':'hundred perfect score','🔥':'fire hot lit','✨':'sparkles shine magic','⭐':'star','🌟':'glowing star','💫':'dizzy star','🎉':'party popper celebrate','🌙':'moon night','☀️':'sun day','🌈':'rainbow','💭':'thought bubble think','💡':'idea light bulb'};
+
+
 var C = {
   bg: '#FAFAF8', white: '#FFFFFF', border: 'rgba(0,0,0,0.1)',
   borderLight: 'rgba(0,0,0,0.06)', text: '#1A1A1A', muted: '#666666',
@@ -93,7 +108,10 @@ export default function EchoSeed() {
   var [showSidebar, setShowSidebar] = useState(true);
   var [listening, setListening] = useState(false);
   var [speakEnabled, setSpeakEnabled] = useState(false);
-  var [pendingImage, setPendingImage] = useState(null);
+  var [pendingFiles, setPendingFiles] = useState([]);
+  var [showEmoji, setShowEmoji] = useState(false);
+  var [emojiCategory, setEmojiCategory] = useState('smileys');
+  var [emojiSearch, setEmojiSearch] = useState('');
   var [voiceSupported, setVoiceSupported] = useState(false);
   var [editingId, setEditingId] = useState(null);
   var [editingTitle, setEditingTitle] = useState('');
@@ -262,7 +280,7 @@ export default function EchoSeed() {
     setActiveId(id);
     setMessages(conv.messages || []);
     setInput('');
-    setPendingImage(null);
+    setPendingFiles([]);
     setEditingMsgIndex(null);
   }
 
@@ -274,7 +292,7 @@ export default function EchoSeed() {
     setActiveId(conv.id);
     setMessages([]);
     setInput('');
-    setPendingImage(null);
+    setPendingFiles([]);
     await saveConvToDb(conv);
     setTimeout(function() { setEditingId(conv.id); setEditingTitle(title); }, 100);
   }
@@ -356,26 +374,37 @@ export default function EchoSeed() {
     window.speechSynthesis.speak(utt);
   }
 
-  function handleFileSelect(e) {
-    var file = e.target.files[0];
-    if (!file) return;
-    var isImage = file.type.startsWith('image/');
-    var isPdf = file.type === 'application/pdf';
-    var isText = !isImage && !isPdf;
-    if (isText) {
-      var textReader = new FileReader();
-      textReader.onload = function(ev) {
-        setPendingImage({ textContent: ev.target.result, type: file.type, preview: null, name: file.name, isPdf: false, isImage: false, isText: true });
-      };
-      textReader.readAsText(file);
-    } else {
-      var reader = new FileReader();
-      reader.onload = function(ev) {
-        setPendingImage({ base64: ev.target.result.split(',')[1], type: file.type, preview: isImage ? ev.target.result : null, name: file.name, isPdf: isPdf, isImage: isImage, isText: false });
-      };
-      reader.readAsDataURL(file);
-    }
+  function readOneFile(file) {
+    return new Promise(function(resolve) {
+      var isImage = file.type.startsWith('image/');
+      var isPdf = file.type === 'application/pdf';
+      var isText = !isImage && !isPdf;
+      if (isText) {
+        var textReader = new FileReader();
+        textReader.onload = function(ev) {
+          resolve({ textContent: ev.target.result, type: file.type, preview: null, name: file.name, isPdf: false, isImage: false, isText: true });
+        };
+        textReader.readAsText(file);
+      } else {
+        var reader = new FileReader();
+        reader.onload = function(ev) {
+          resolve({ base64: ev.target.result.split(',')[1], type: file.type, preview: isImage ? ev.target.result : null, name: file.name, isPdf: isPdf, isImage: isImage, isText: false });
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+  }
+
+  async function handleFileSelect(e) {
+    var files = Array.prototype.slice.call(e.target.files);
+    if (!files.length) return;
+    var results = await Promise.all(files.map(readOneFile));
+    setPendingFiles(function(prev) { return prev.concat(results); });
     e.target.value = '';
+  }
+
+  function removePendingFile(index) {
+    setPendingFiles(function(prev) { return prev.filter(function(_, i) { return i !== index; }); });
   }
 
   function getActiveTitle() {
@@ -417,26 +446,40 @@ export default function EchoSeed() {
   }
 
   async function send() {
-    if ((!input.trim() && !pendingImage) || loading) return;
+    if ((!input.trim() && pendingFiles.length === 0) || loading) return;
     var text = input.trim();
-    var img = pendingImage;
-    var filePrompt = text || (img && img.isImage ? 'What do you see in this image?' : 'Please read this file and summarise it for me.');
-    var apiContent = img
-      ? img.isText
-        ? (filePrompt + '\n\nFile: ' + img.name + '\n\n' + img.textContent)
-        : [
-            img.isImage
-              ? { type: 'image', source: { type: 'base64', media_type: img.type, data: img.base64 } }
-              : { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: img.base64 } },
-            { type: 'text', text: filePrompt }
-          ]
+    var files = pendingFiles;
+    var hasFiles = files.length > 0;
+
+    var fileBlocks = files.map(function(f) {
+      if (f.isText) {
+        return { type: 'text', text: 'File: ' + f.name + '\n\n' + f.textContent };
+      }
+      if (f.isImage) {
+        return { type: 'image', source: { type: 'base64', media_type: f.type, data: f.base64 } };
+      }
+      return { type: 'document', source: { type: 'base64', media_type: 'application/pdf', data: f.base64 } };
+    });
+
+    var defaultPrompt = hasFiles
+      ? (files.length > 1 ? 'Please look at these files.' : (files[0].isImage ? 'What do you see in this image?' : 'Please read this file and summarise it for me.'))
+      : '';
+    var promptText = text || defaultPrompt;
+
+    var apiContent = hasFiles
+      ? fileBlocks.concat([{ type: 'text', text: promptText }])
       : text;
-    var userMsg = { role: 'user', content: apiContent, displayText: text || 'Shared a file', imagePreview: img && img.isImage ? img.preview : null };
+
+    var imagePreviews = files.filter(function(f) { return f.isImage; }).map(function(f) { return f.preview; });
+    var fileNames = files.map(function(f) { return f.name; }).join(', ');
+    var displayText = text || (hasFiles ? 'Shared: ' + fileNames : '');
+
+    var userMsg = { role: 'user', content: apiContent, displayText: displayText, imagePreviews: imagePreviews.length > 0 ? imagePreviews : null };
     var next = messages.concat([userMsg]);
     setMessages(next);
     await saveMessages(next);
     setInput('');
-    setPendingImage(null);
+    setPendingFiles([]);
     if (taRef.current) taRef.current.style.height = 'auto';
     await doSend(next, memories.slice());
   }
@@ -475,7 +518,7 @@ export default function EchoSeed() {
     return d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
   }
 
-  var canSend = (input.trim() || pendingImage) && !loading;
+  var canSend = (input.trim() || pendingFiles.length > 0) && !loading;
 
   return (
     <>
@@ -585,7 +628,11 @@ export default function EchoSeed() {
                       <button className="edit-btn" onClick={function() { setEditingMsgIndex(i); setEditingMsgText(msg.displayText || ''); }} style={{ opacity: 0, fontSize: 11, background: 'none', border: 'none', color: C.light, cursor: 'pointer', padding: '0 2px', transition: 'opacity .15s' }}>✏️</button>
                     )}
                   </div>
-                  {msg.imagePreview && <img src={msg.imagePreview} alt="shared" style={{ maxWidth: 200, borderRadius: 10, marginBottom: 3 }} />}
+                  {msg.imagePreviews && msg.imagePreviews.length > 0 && (
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', marginBottom: 3, justifyContent: msg.role === 'user' ? 'flex-end' : 'flex-start' }}>
+                      {msg.imagePreviews.map(function(src, pi) { return <img key={pi} src={src} alt="shared" style={{ maxWidth: 140, borderRadius: 10 }} />; })}
+                    </div>
+                  )}
                   {isEditingThis ? (
                     <div style={{ maxWidth: '80%', display: 'flex', flexDirection: 'column', gap: 6, alignItems: 'flex-end' }}>
                       <textarea ref={msgEditRef} value={editingMsgText} onChange={function(e) { setEditingMsgText(e.target.value); }} onKeyDown={function(e) { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); commitMsgEdit(i); } if (e.key === 'Escape') setEditingMsgIndex(null); }} autoFocus rows={3} style={{ width: 320, resize: 'none', padding: '8px 12px', fontSize: 14, lineHeight: 1.5, border: '1.5px solid ' + C.accent, borderRadius: 12, background: C.white, color: C.text, fontFamily: 'inherit' }} />
@@ -614,21 +661,61 @@ export default function EchoSeed() {
             <div ref={endRef} />
           </div>
 
-          {pendingImage && (
-            <div style={{ padding: '6px 18px', background: C.bg, borderTop: '1px solid ' + C.border, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0 }}>
-              {pendingImage.isPdf
-                ? <div style={{ width: 40, height: 40, borderRadius: 6, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 18 }}>📄</div>
-                : <img src={pendingImage.preview} alt="" style={{ height: 40, width: 40, objectFit: 'cover', borderRadius: 6 }} />
-              }
-              <span style={{ fontSize: 12, color: C.muted, flex: 1 }}>{pendingImage.name}</span>
-              <button onClick={function() { setPendingImage(null); }} style={{ background: 'none', color: C.light, fontSize: 18, padding: '0 4px' }}>×</button>
+          {pendingFiles.length > 0 && (
+            <div style={{ padding: '6px 18px', background: C.bg, borderTop: '1px solid ' + C.border, display: 'flex', alignItems: 'center', gap: 8, flexShrink: 0, flexWrap: 'wrap' }}>
+              {pendingFiles.map(function(f, fi) {
+                return (
+                  <div key={fi} style={{ display: 'flex', alignItems: 'center', gap: 6, background: C.white, border: '1px solid ' + C.border, borderRadius: 8, padding: '4px 8px' }}>
+                    {f.isImage
+                      ? <img src={f.preview} alt="" style={{ height: 28, width: 28, objectFit: 'cover', borderRadius: 4 }} />
+                      : <div style={{ width: 28, height: 28, borderRadius: 4, background: '#FEE2E2', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14 }}>{f.isPdf ? '📄' : '📃'}</div>
+                    }
+                    <span style={{ fontSize: 12, color: C.muted, maxWidth: 120, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{f.name}</span>
+                    <button onClick={function() { removePendingFile(fi); }} style={{ background: 'none', color: C.light, fontSize: 16, padding: '0 2px' }}>×</button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {showEmoji && (
+            <div style={{ padding: '10px 18px', background: C.bg, borderTop: '1px solid ' + C.border, flexShrink: 0 }}>
+              <input
+                value={emojiSearch}
+                onChange={function(e) { setEmojiSearch(e.target.value); }}
+                placeholder="Search emoji... (e.g. donut, mushroom)"
+                style={{ width: '100%', padding: '6px 10px', fontSize: 13, border: '1px solid ' + C.border, borderRadius: 8, background: C.white, color: C.text, marginBottom: 8 }}
+              />
+              {!emojiSearch && (
+                <div style={{ display: 'flex', gap: 4, marginBottom: 8, overflowX: 'auto', paddingBottom: 2 }}>
+                  {Object.keys(EMOJI_CATEGORIES).map(function(cat) {
+                    return (
+                      <button key={cat} onClick={function() { setEmojiCategory(cat); }} style={{ fontSize: 12, padding: '4px 10px', borderRadius: 14, border: '1px solid ' + (emojiCategory === cat ? C.accent : C.border), background: emojiCategory === cat ? C.accentLight : C.white, color: emojiCategory === cat ? C.accent : C.muted, whiteSpace: 'nowrap', flexShrink: 0 }}>
+                        {EMOJI_CATEGORY_LABELS[cat]}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+              <div style={{ display: 'flex', flexWrap: 'wrap', gap: 2, maxHeight: 140, overflowY: 'auto' }}>
+                {(emojiSearch
+                  ? Object.keys(EMOJI_KEYWORDS).filter(function(e) { return EMOJI_KEYWORDS[e].indexOf(emojiSearch.toLowerCase().trim()) !== -1; })
+                  : EMOJI_CATEGORIES[emojiCategory]
+                ).map(function(e, ei) {
+                  return <button key={ei} onClick={function() { setInput(function(prev) { return prev + e; }); }} style={{ fontSize: 22, background: 'none', padding: 5, lineHeight: 1, borderRadius: 6 }}>{e}</button>;
+                })}
+                {emojiSearch && Object.keys(EMOJI_KEYWORDS).filter(function(e) { return EMOJI_KEYWORDS[e].indexOf(emojiSearch.toLowerCase().trim()) !== -1; }).length === 0 && (
+                  <span style={{ fontSize: 12, color: C.light, fontStyle: 'italic', padding: 6 }}>No matches for "{emojiSearch}" — try browsing a category instead.</span>
+                )}
+              </div>
             </div>
           )}
 
           <div style={{ padding: '10px 18px', borderTop: '1px solid ' + C.border, flexShrink: 0 }}>
             <div style={{ display: 'flex', gap: 6, alignItems: 'flex-end' }}>
-              <input ref={fileRef} type="file" accept="*/*" onChange={handleFileSelect} style={{ display: 'none' }} />
+              <input ref={fileRef} type="file" accept="*/*" multiple onChange={handleFileSelect} style={{ display: 'none' }} />
               <button onClick={function() { if (fileRef.current) fileRef.current.click(); }} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + C.border, background: 'transparent', color: C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>📎</button>
+              <button onClick={function() { setShowEmoji(!showEmoji); }} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + (showEmoji ? C.accent : C.border), background: showEmoji ? C.accentLight : 'transparent', color: showEmoji ? C.accent : C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>😊</button>
               {voiceSupported && (
                 <button onClick={toggleListen} style={{ width: 34, height: 34, borderRadius: '50%', border: '1px solid ' + (listening ? C.accent : C.border), background: listening ? C.accentLight : 'transparent', color: listening ? C.accent : C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center', flexShrink: 0 }}>
                   {listening ? '⏹' : '🎤'}
