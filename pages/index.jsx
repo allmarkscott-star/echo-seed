@@ -525,15 +525,29 @@ export default function EchoSeed() {
     return conv ? conv.title : '';
   }
 
+  function isTradingConversation(title) {
+    if (!title) return false;
+    var t = title.toLowerCase();
+    return t.indexOf('trading') !== -1 || t.indexOf('trade') !== -1 || t.indexOf('nq') !== -1 || t.indexOf('market') !== -1 || t.indexOf('strategy') !== -1;
+  }
+
   async function doSend(msgsToSend, snap, convId) {
     setLoading(true);
     try {
+      var CONTEXT_WINDOW = 40;
+      var contextMessages = msgsToSend.length > CONTEXT_WINDOW ? msgsToSend.slice(-CONTEXT_WINDOW) : msgsToSend;
+      if (contextMessages.length > 0 && contextMessages[0].role !== 'user') {
+        contextMessages = contextMessages.slice(1);
+      }
+      var activeTitle = getActiveTitle();
+      var useModel = isTradingConversation(activeTitle) ? 'claude-opus-4-7' : 'claude-sonnet-4-6';
       var res = await fetch('/api/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          messages: msgsToSend.map(function(m) { return { role: m.role, content: m.content }; }),
-          systemPrompt: buildSystemPrompt(snap, getActiveTitle())
+          messages: contextMessages.map(function(m) { return { role: m.role, content: m.content }; }),
+          systemPrompt: buildSystemPrompt(snap, activeTitle),
+          model: useModel
         })
       });
       var data = await res.json();
@@ -718,6 +732,9 @@ export default function EchoSeed() {
             <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
               <button onClick={function() { setShowSidebar(!showSidebar); }} style={{ width: 30, height: 30, borderRadius: 6, background: 'transparent', color: C.muted, fontSize: 16, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>☰</button>
               <div style={{ fontSize: 14, fontWeight: 500, color: C.text }}>{getActiveTitle()}</div>
+              <span style={{ fontSize: 10, padding: '2px 7px', borderRadius: 10, background: isTradingConversation(getActiveTitle()) ? '#FEF3CD' : C.accentLight, color: isTradingConversation(getActiveTitle()) ? '#7A5C00' : C.accent, fontWeight: 600 }}>
+                {isTradingConversation(getActiveTitle()) ? 'OPUS' : 'SONNET'}
+              </span>
             </div>
             <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
               {voiceSupported && (
