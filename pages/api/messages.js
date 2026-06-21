@@ -38,7 +38,7 @@ export default async function handler(req, res) {
 
     } else if (req.method === 'POST') {
       var body = req.body;
-      var result = await sb('chat_messages', {
+      var result = await sb('chat_messages?on_conflict=conversation_id,seq', {
         method: 'POST',
         headers: { 'Prefer': 'resolution=merge-duplicates,return=representation' },
         body: JSON.stringify({
