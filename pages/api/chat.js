@@ -36,7 +36,9 @@ export default async function handler(req, res) {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
-  const { messages, systemPrompt } = req.body;
+  const { messages, systemPrompt, model } = req.body;
+  const ALLOWED_MODELS = ['claude-sonnet-4-6', 'claude-opus-4-7'];
+  const useModel = ALLOWED_MODELS.indexOf(model) !== -1 ? model : 'claude-sonnet-4-6';
 
   try {
     const response = await fetch('https://api.anthropic.com/v1/messages', {
@@ -47,7 +49,7 @@ export default async function handler(req, res) {
         'anthropic-version': '2023-06-01'
       },
       body: JSON.stringify({
-        model: 'claude-opus-4-7',
+        model: useModel,
         max_tokens: 1500,
         system: systemPrompt,
         messages: sanitizeMessages(messages),
