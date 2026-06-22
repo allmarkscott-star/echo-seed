@@ -79,6 +79,22 @@ function cleanText(text) {
   return text.replace(/\[MEMORY:[^\]]+\]/g, '').trim();
 }
 
+function trimHeavyContent(messages, keepFullCount) {
+  // Replace base64 image/document data in older messages with lightweight text,
+  // keeping only the most recent `keepFullCount` messages with files intact.
+  var cutoff = messages.length - keepFullCount;
+  return messages.map(function(m, i) {
+    if (!Array.isArray(m.content)) return m;
+    if (i >= cutoff) return m;
+    var lightContent = m.content.map(function(block) {
+      if (block.type === 'image') return { type: 'text', text: '[An image was shared earlier in this conversation]' };
+      if (block.type === 'document') return { type: 'text', text: '[A file was shared earlier in this conversation]' };
+      return block;
+    });
+    return Object.assign({}, m, { content: lightContent });
+  });
+}
+
 function extractSources(content) {
   var sources = [];
   var seen = {};
@@ -570,6 +586,7 @@ export default function EchoSeed() {
       if (contextMessages.length > 0 && contextMessages[0].role !== 'user') {
         contextMessages = contextMessages.slice(1);
       }
+      contextMessages = trimHeavyContent(contextMessages, 2);
       var activeTitle = getActiveTitle();
       var useModel = isTradingConversation(activeTitle) ? 'claude-opus-4-7' : 'claude-sonnet-4-6';
       var res = await fetch('/api/chat', {
