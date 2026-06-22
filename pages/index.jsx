@@ -53,7 +53,10 @@ You cannot message Scott first. You cannot work in the background. You cannot do
 So never say "I'll be back in a minute," "I'm still looking," "wait there," or anything implying you're doing something ongoing he should wait for. If you need to search, do it within that same reply and come back with the answer immediately — don't promise a future moment you can't deliver. If something can't be done in one reply, say so plainly: "I can't actually do that part — here's what I can tell you instead."
 
 LABEL YOUR CERTAINTY:
-Be explicit about how you know what you're saying. There's a real difference between "I know this," "I'm inferring this from what you've told me," "I'm guessing," and "I just verified this by searching." Don't let confident, polished language stand in for any of those when it isn't true. If you're not sure, the honest version is usually shorter and plainer than the impressive version — say the plain one. A genuine "I don't know" is worth more than an eloquent guess dressed up as knowledge.`;
+Be explicit about how you know what you're saying. There's a real difference between "I know this," "I'm inferring this from what you've told me," "I'm guessing," and "I just verified this by searching." Don't let confident, polished language stand in for any of those when it isn't true. If you're not sure, the honest version is usually shorter and plainer than the impressive version — say the plain one. A genuine "I don't know" is worth more than an eloquent guess dressed up as knowledge.
+
+SOURCES MEAN ACTUAL SOURCES:
+If Scott asks for sources, or asks you to verify something, never just say "sources attached," "verified," or "fully checked" without literally naming a real, specific source — an actual website, publication, or named reference. Repeating the same claim with more confident wording is not a source and is not verification. If you searched, the real source links are automatically shown beneath your reply — you don't need to fake a list yourself. If you cannot point to something real, say plainly that you can't verify it rather than asserting confidence you don't have.`;
 
 function buildSystemPrompt(memories, conversationTitle) {
   var memSection = memories.length > 0
@@ -70,6 +73,30 @@ function extractNewMemories(text) {
 
 function cleanText(text) {
   return text.replace(/\[MEMORY:[^\]]+\]/g, '').trim();
+}
+
+function extractSources(content) {
+  var sources = [];
+  var seen = {};
+  (content || []).forEach(function(block) {
+    if (block.type === 'text' && Array.isArray(block.citations)) {
+      block.citations.forEach(function(c) {
+        if (c.url && !seen[c.url]) {
+          seen[c.url] = true;
+          sources.push({ title: c.title || c.url, url: c.url });
+        }
+      });
+    }
+    if (block.type === 'web_search_tool_result' && Array.isArray(block.content)) {
+      block.content.forEach(function(r) {
+        if (r.url && !seen[r.url]) {
+          seen[r.url] = true;
+          sources.push({ title: r.title || r.url, url: r.url });
+        }
+      });
+    }
+  });
+  return sources;
 }
 
 function generateId() {
@@ -553,12 +580,16 @@ export default function EchoSeed() {
       var data = await res.json();
       if (data.error) throw new Error(typeof data.error === 'string' ? data.error : (data.error.message || data.error.error?.message || JSON.stringify(data.error)));
       var raw = data.content.map(function(b) { return b.text || ''; }).join('');
+      var sources = extractSources(data.content);
       var newMems = extractNewMemories(raw);
       var latestMems = snap;
       for (var i = 0; i < newMems.length; i++) {
         latestMems = await saveMem(newMems[i]);
       }
       var clean = cleanText(raw);
+      if (sources.length > 0) {
+        clean += '\n\nSources:\n' + sources.map(function(s) { return '• ' + s.title + ' — ' + s.url; }).join('\n');
+      }
       var assistantMsg = { role: 'assistant', content: clean, displayText: clean };
       var withReply = msgsToSend.concat([assistantMsg]);
       setMessages(withReply);
